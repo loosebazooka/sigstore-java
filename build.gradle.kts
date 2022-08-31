@@ -216,17 +216,18 @@ publishing {
 
 // this task should be used by github actions to create release artifacts along with a slsa
 // attestation.
+
 tasks.register("createReleaseBundle") {
+
     val releaseDir = layout.buildDirectory.dir("release")
     outputs.dir(releaseDir)
     dependsOn((publishing.publications["mavenJava"] as DefaultMavenPublication).publishableArtifacts)
     doLast {
-        (publishing.publications["mavenJava"] as DefaultMavenPublication).publishableArtifacts.files
-            .forEach {
-                project.copy {
-                    from(it.absolutePath)
-                    into(releaseDir)
-                }
-            }
+        project.copy {
+            from((publishing.publications["mavenJava"] as DefaultMavenPublication).publishableArtifacts.files)
+            into(releaseDir)
+            rename("pom-default.xml", "${project.name}-${project.version}.pom")
+            rename("module.json", "${project.name}-${project.version}.module")
+        }
     }
 }

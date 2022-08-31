@@ -17,11 +17,11 @@ jobs:
             echo 'version "${{ github.event.inputs.release_version }}" not in ###.###.### format'
             exit 1
           fi
-  ci:
-    uses: ./.github/workflows/ci.yaml
+  # ci:
+    # uses: ./.github/workflows/ci.yaml
 
   create-tag:
-    needs: [checks, ci]
+    needs: [checks] #, ci]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -94,6 +94,8 @@ jobs:
         with:
           name: "${{ needs.provenance.outputs.attestation-name }}"
           path: ./release/
+      - name: Rename attestation
+        run: mv ./release/${{ needs.provenance.outputs.attestation-name }} ./release/sigstore-java-${{ github.event.inputs.release_version }}.intoto.jsonl
       - name: Download gradle release artifacts
         uses: actions/download-artifact@v3
         with:

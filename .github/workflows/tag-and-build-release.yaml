@@ -81,6 +81,7 @@ jobs:
       contents: write # To add assets to a release.
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.2.0
     with:
+      attestation-name: "sigstore-java-${{ github.event.inputs.release_version }}.intoto.jsonl"
       base64-subjects: "${{ needs.build.outputs.hashes }}"
 
   create-release:
@@ -94,8 +95,6 @@ jobs:
         with:
           name: "${{ needs.provenance.outputs.attestation-name }}"
           path: ./release/
-      - name: Rename attestation
-        run: mv ./release/${{ needs.provenance.outputs.attestation-name }} ./release/sigstore-java-${{ github.event.inputs.release_version }}.intoto.jsonl
       - name: Download gradle release artifacts
         uses: actions/download-artifact@v3
         with:

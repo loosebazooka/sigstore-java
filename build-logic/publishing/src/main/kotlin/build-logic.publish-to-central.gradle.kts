@@ -1,5 +1,3 @@
-import org.gradle.api.publish.internal.PublicationInternal
-
 plugins {
     id("java-library")
     id("maven-publish")
@@ -62,26 +60,3 @@ publishing {
         }
     }
 }
-
-val createReleaseBundle by tasks.registering(Sync::class) {
-    description = "This task should be used by github actions to create release artifacts along with a slsa attestation"
-    val releaseDir = layout.buildDirectory.dir("release")
-    outputs.dir(releaseDir)
-
-    into(releaseDir)
-    rename("pom-default.xml", "${project.name}-${project.version}.pom")
-    rename("module.json", "${project.name}-${project.version}.module")
-}
-
-publishing {
-    publications.configureEach {
-        (this as PublicationInternal<*>).allPublishableArtifacts {
-            val publicationArtifact = this
-            createReleaseBundle.configure {
-                dependsOn(publicationArtifact)
-                from(publicationArtifact.file)
-            }
-        }
-    }
-}
-

@@ -28,6 +28,16 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: verify tag matches gradle version
+        run: |
+          set -Eeo pipefail
+          version=$(grep "^version=" gradle.properties | cut -d'=' -f2)
+          if [[ ! "$version" == "${ github.event.inputs.release_version }" ]]; then
+            echo "tag ${{ github.event.inputs.release_version }} does not match gradle.properties $version"
+            exit 1
+          fi
       - name: tag
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
@@ -56,9 +66,12 @@ jobs:
           java-version: 11
           distribution: 'temurin'
 
-      - name: Build project
+      - name: Build and Sign project
         run: |
-          ./gradlew clean :sigstore-java:createReleaseBundle -Pversion=${{ github.event.inputs.release_version }} -Prelease -PskipSign
+          ./gradlew clean :sigstore-java:createReleaseBundle -Prelease
+        env:
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.PGP_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.PGP_PASSPHRASE }}
 
       - name: Hash Artifacts
         id: hash

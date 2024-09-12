@@ -11,6 +11,7 @@ slack channel
 
 ## Minimum Requirements
 * Java 11
+* blah blah (delete me)
 
 ## Usage
 

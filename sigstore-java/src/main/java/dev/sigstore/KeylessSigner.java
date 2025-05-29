@@ -16,6 +16,7 @@
 package dev.sigstore;
 
 import com.google.api.client.util.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
@@ -346,6 +347,12 @@ public class KeylessSigner implements AutoCloseable {
       var calculatedHashedRekord =
           Base64.toBase64String(rekorRequest.toJsonPayload().getBytes(StandardCharsets.UTF_8));
       if (!Objects.equals(calculatedHashedRekord, rekorResponse.getEntry().getBody())) {
+        System.out.println("calculated\n");
+        Splitter.fixedLength(1000).split(calculatedHashedRekord).forEach(System.out::println);
+        System.out.println("response\n");
+        Splitter.fixedLength(1000)
+            .split(rekorResponse.getEntry().getBody())
+            .forEach(System.out::println);
         throw new KeylessSignerException("Returned log entry was inconsistent with request");
       }
 
